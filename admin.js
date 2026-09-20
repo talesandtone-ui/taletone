@@ -27,8 +27,35 @@ const adminApp = {
     if (isAuthed === 'true') {
       this.showDashboard();
       this.fetchInquiries();
+      this.setupRealtime();
     } else {
       this.showLogin();
+    }
+  },
+
+  setupRealtime() {
+    if (this.supabase && typeof this.supabase.channel === 'function') {
+      try {
+        this.supabase
+          .channel('public:contacts:realtime')
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'contacts' }, () => {
+            console.log('Realtime change detected in contacts table. Refreshing...');
+            this.fetchInquiries(true);
+          })
+          .subscribe();
+      } catch (err) {
+        console.warn('Realtime subscription notice:', err);
+      }
+    }
+
+    // Background auto-refresh every 15 seconds to ensure no leads are ever missed!
+    if (!this.refreshInterval) {
+      this.refreshInterval = setInterval(() => {
+        const isAuthed = localStorage.getItem('tt_admin_authenticated');
+        if (isAuthed === 'true') {
+          this.fetchInquiries(true);
+        }
+      }, 15000);
     }
   },
 
@@ -148,15 +175,17 @@ const adminApp = {
   // ==========================================
   // DATA FETCHING & SYNC
   // ==========================================
-  async fetchInquiries() {
+  async fetchInquiries(silent = false) {
     const loading = document.getElementById('loadingState');
     const empty = document.getElementById('emptyState');
     const list = document.getElementById('inquiriesList');
     const dbAlert = document.getElementById('dbAlertBanner');
 
-    loading.style.display = 'block';
-    empty.style.display = 'none';
-    list.innerHTML = '';
+    if (!silent) {
+      loading.style.display = 'block';
+      empty.style.display = 'none';
+      list.innerHTML = '';
+    }
 
     try {
       let data = [];
