@@ -62,28 +62,6 @@ const adminApp = {
   // ==========================================
   // AUTHENTICATION
   // ==========================================
-  switchAuthTab(type) {
-    const tabPasscode = document.getElementById('tabPasscodeBtn');
-    const tabEmail = document.getElementById('tabEmailBtn');
-    const passcodeForm = document.getElementById('passcodeForm');
-    const emailForm = document.getElementById('emailAuthForm');
-    const errBox = document.getElementById('loginError');
-
-    errBox.style.display = 'none';
-
-    if (type === 'passcode') {
-      tabPasscode.classList.add('active');
-      tabEmail.classList.remove('active');
-      passcodeForm.style.display = 'block';
-      emailForm.style.display = 'none';
-    } else {
-      tabEmail.classList.add('active');
-      tabPasscode.classList.remove('active');
-      emailForm.style.display = 'block';
-      passcodeForm.style.display = 'none';
-    }
-  },
-
   async hashString(str) {
     const encoder = new TextEncoder();
     const data = encoder.encode(str);
@@ -110,36 +88,6 @@ const adminApp = {
       this.fetchInquiries();
     } else {
       errBox.innerText = 'Incorrect admin passcode. Access denied.';
-      errBox.style.display = 'block';
-    }
-  },
-
-  async handleEmailLogin(e) {
-    e.preventDefault();
-    const email = document.getElementById('adminEmail').value.trim();
-    const password = document.getElementById('adminEmailPassword').value;
-    const errBox = document.getElementById('loginError');
-
-    if (!this.supabase) {
-      errBox.innerText = 'Supabase client could not be loaded.';
-      errBox.style.display = 'block';
-      return;
-    }
-
-    try {
-      const { data, error } = await this.supabase.auth.signInWithPassword({ email, password });
-      if (error) {
-        errBox.innerText = error.message;
-        errBox.style.display = 'block';
-      } else {
-        localStorage.setItem('tt_admin_authenticated', 'true');
-        localStorage.setItem('tt_admin_type', 'supabase');
-        errBox.style.display = 'none';
-        this.showDashboard();
-        this.fetchInquiries();
-      }
-    } catch (err) {
-      errBox.innerText = err.message || 'Login failed.';
       errBox.style.display = 'block';
     }
   },
