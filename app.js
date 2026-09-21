@@ -402,35 +402,6 @@ const app = {
     }, 8000);
   },
 
-  async sendViaWhatsApp() {
-    const name = document.getElementById('userName').value.trim() || 'A brand partner';
-    const email = document.getElementById('userEmail').value.trim() || 'Via WhatsApp';
-    const service = document.getElementById('userService').value || 'Writing & Brand Voice';
-    const message = document.getElementById('userMessage').value.trim() || 'I would like to discuss a content writing project.';
-
-    // If visitor filled in any details, capture it in Supabase immediately!
-    if (document.getElementById('userName').value.trim() || document.getElementById('userEmail').value.trim() || document.getElementById('userMessage').value.trim()) {
-      try {
-        if (!this.supabaseClient && window.supabase && typeof window.supabase.createClient === 'function') {
-          this.supabaseClient = window.supabase.createClient(this.supabaseUrl, this.supabaseKey);
-        }
-        if (this.supabaseClient) {
-          await this.supabaseClient
-            .from('contacts')
-            .insert([{ name, email, service, message: `[WhatsApp Direct Inquiry] ${message}`, status: 'new' }]);
-        }
-      } catch (err) {
-        console.warn('Lead capture notice:', err);
-      }
-    }
-
-    const text = `Hi Dharsi,\n\nI am contacting you through Tales & Tone.\n*Name:* ${name}\n*Service Interested In:* ${service}\n*Project Details:* ${message}`;
-    const encoded = encodeURIComponent(text);
-    const url = `https://wa.me/919313100689?text=${encoded}`;
-
-    window.open(url, '_blank');
-  },
-
   // ==========================================
   // KEYBOARD ACCESSIBILITY
   // ==========================================
